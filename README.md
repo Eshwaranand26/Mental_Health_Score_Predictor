@@ -50,7 +50,7 @@ If an input exceeds 24 hours, the UI displays a clear red warning box and disabl
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/<your-username>/Mental_Health_Score_Predictor.git
+git clone https://github.com/Eshwaranand26/Mental_Health_Score_Predictor.git
 cd Mental_Health_Score_Predictor
 ```
 
