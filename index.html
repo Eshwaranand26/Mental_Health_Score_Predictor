@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mental Health Score Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1c2536;
+    --navy-deep:#141b28;
+    --bg:#eef1f6;
+    --panel:#ffffff;
+    --ink:#1c2536;
+    --ink-soft:#5a6478;
+    --teal:#3e7c74;
+    --teal-soft:#dbe9e6;
+    --rose:#c2707b;
+    --rose-soft:#f3dde0;
+    --hair:#d8dde6;
+    --radius:4px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .shell{
+    display:grid;
+    grid-template-columns:minmax(280px,38%) 1fr;
+    min-height:100vh;
+  }
+  @media (max-width:860px){
+    .shell{grid-template-columns:1fr;}
+  }
+
+  /* ---------- Left panel ---------- */
+  .intro{
+    background:linear-gradient(175deg,var(--navy) 0%,var(--navy-deep) 100%);
+    color:#eef1f6;
+    padding:56px 44px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    position:relative;
+  }
+  .intro-top .kicker{
+    font-size:14px;
+    color:#9aa6bd;
+    margin:0 0 18px;
+    line-height:1.5;
+  }
+  .intro-top h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:clamp(30px,4vw,42px);
+    line-height:1.12;
+    margin:0 0 22px;
+    letter-spacing:-0.01em;
+  }
+  .intro-top p{
+    font-size:15px;
+    line-height:1.65;
+    color:#c3cbdb;
+    max-width:34ch;
+    margin:0;
+  }
+  .gauge-wrap{
+    margin-top:40px;
+  }
+  .gauge-label{
+    font-size:13px;
+    color:#9aa6bd;
+    margin-bottom:10px;
+  }
+  .gauge{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:var(--radius);
+    padding:22px 22px 20px;
+    min-height:104px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .gauge .empty{
+    color:#7d879c;
+    font-size:14px;
+    line-height:1.6;
+  }
+  .gauge .score{
+    font-family:'Fraunces',serif;
+    font-size:46px;
+    font-weight:500;
+    line-height:1;
+    color:#f4f6fa;
+  }
+  .gauge .score span{
+    font-size:16px;
+    font-family:'Inter',sans-serif;
+    color:#9aa6bd;
+    margin-left:6px;
+  }
+  .gauge .bar-track{
+    margin-top:14px;
+    height:6px;
+    background:rgba(255,255,255,0.12);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .gauge .bar-fill{
+    height:100%;
+    background:var(--teal);
+    width:0%;
+    transition:width .5s ease;
+  }
+  .gauge .read{
+    margin-top:10px;
+    font-size:13px;
+    color:#c3cbdb;
+  }
+  .foot-note{
+    font-size:12px;
+    color:#6b7690;
+    line-height:1.6;
+    margin-top:32px;
+    max-width:34ch;
+  }
+
+  /* ---------- Right panel ---------- */
+  .form-panel{
+    padding:56px 48px;
+    max-width:760px;
+  }
+  @media (max-width:860px){
+    .form-panel{padding:36px 24px 64px;}
+    .intro{padding:36px 24px;}
+  }
+  .api-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:40px;
+    padding-bottom:20px;
+    border-bottom:1px solid var(--hair);
+  }
+  .api-row label{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .api-row input{
+    flex:1;
+    border:1px solid var(--hair);
+    border-radius:var(--radius);
+    padding:8px 10px;
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    background:#fbfbfd;
+  }
+  .api-row input:focus{outline:2px solid var(--teal);outline-offset:1px;}
+
+  form{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px 24px;
+  }
+  .field{display:flex;flex-direction:column;gap:7px;}
+  .field.wide{grid-column:1 / -1;}
+  .field label{
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .field input, .field select{
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    padding:10px 12px;
+    border:1px solid var(--hair);
+    border-radius:var(--radius);
+    background:var(--panel);
+    color:var(--ink);
+    appearance:none;
+  }
+  .field select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6478' stroke-width='1.5' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    padding-right:32px;
+  }
+  .field input:focus, .field select:focus{
+    outline:2px solid var(--teal);
+    outline-offset:1px;
+    border-color:var(--teal);
+  }
+  .field .hint{font-size:11.5px;color:#9098a8;}
+
+  .stress-group{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .stress-chip{
+    border:1px solid var(--hair);
+    background:var(--panel);
+    border-radius:var(--radius);
+    padding:9px 14px;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    user-select:none;
+  }
+  .stress-chip.active{
+    border-color:var(--teal);
+    background:var(--teal-soft);
+    color:var(--teal);
+    font-weight:500;
+  }
+
+  .actions{
+    grid-column:1 / -1;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-top:8px;
+  }
+  button.submit{
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    font-weight:600;
+    color:#fff;
+    background:var(--navy);
+    border:none;
+    border-radius:var(--radius);
+    padding:13px 26px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  button.submit:hover{background:var(--navy-deep);}
+  button.submit:disabled{background:#a7aebc;cursor:not-allowed;}
+  .status{
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .status.error{color:#a3323f;}
+
+  .result-panel{
+    display:none;
+    grid-column:1 / -1;
+    margin-top:4px;
+    padding:20px 22px;
+    border:1px solid var(--teal);
+    background:var(--teal-soft);
+    border-radius:var(--radius);
+  }
+  .result-panel.show{display:block;}
+  .result-panel .r-label{
+    font-size:12.5px;
+    color:#2f5e58;
+    margin-bottom:4px;
+  }
+  .result-panel .r-value{
+    font-family:'Fraunces',serif;
+    font-size:30px;
+    color:#20423d;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="intro">
+    <div class="intro-top">
+      <p class="kicker">Digital habits &amp; wellbeing</p>
+      <h1>What your screen time says about your mental health score</h1>
+      <p>Enter a profile on the right — usage habits, sleep, study load, stress — and the model estimates a mental health score from patterns learned across student survey data.</p>
+
+      <div class="gauge-wrap">
+        <div class="gauge-label">Predicted score</div>
+        <div class="gauge" id="gauge">
+          <div class="empty" id="gaugeEmpty">No prediction yet. Fill in the form and run it.</div>
+          <div id="gaugeResult" style="display:none;">
+            <div class="score" id="scoreValue">0.0<span>/ 10</span></div>
+            <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+            <div class="read" id="scoreRead"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="foot-note">This estimate comes from a statistical model trained on self-reported survey data. It is not a clinical assessment — if you're struggling, please talk to a person you trust or a professional.</p>
+  </aside>
+
+  <main class="form-panel">
+    <div class="api-row">
+      <label for="apiBase">API base URL</label>
+      <input id="apiBase" type="text" value="http://localhost:8000" spellcheck="false" />
+    </div>
+
+    <form id="predictForm">
+      <div class="field">
+        <label for="age">Age</label>
+        <input id="age" type="number" min="10" max="100" value="21" required />
+      </div>
+
+      <div class="field">
+        <label for="gender">Gender</label>
+        <select id="gender">
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="country">Country</label>
+        <select id="country">
+          <option>India</option><option>USA</option><option>Canada</option>
+          <option>Australia</option><option>UK</option><option>Germany</option>
+          <option>Mexico</option><option>Turkey</option><option>France</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="academic_level">Academic level</label>
+        <select id="academic_level">
+          <option>High school</option>
+          <option selected>Undergraduate</option>
+          <option>Graduate</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="platform">Most used platform</label>
+        <select id="platform">
+          <option>Instagram</option><option>Twitter</option><option>Facebook</option>
+          <option>Youtube</option><option>LinkedIn</option><option>LINE</option>
+          <option>Snapchat</option><option>Tiktok</option><option>KakaoTalk</option>
+          <option>VKontakte</option><option>Xing</option><option>Whatsapp</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="purpose">Main purpose of use</label>
+        <select id="purpose">
+          <option>Networking</option><option>Education</option>
+          <option>Entertainment</option><option>News</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="usage">Avg. daily usage (hours)</label>
+        <input id="usage" type="number" step="0.1" min="0" max="24" value="4" />
+      </div>
+
+      <div class="field">
+        <label for="unlocks">Daily phone unlocks</label>
+        <input id="unlocks" type="number" min="0" value="60" />
+      </div>
+
+      <div class="field">
+        <label for="study">Study hours / day</label>
+        <input id="study" type="number" step="0.1" min="0" max="24" value="3" />
+      </div>
+
+      <div class="field">
+        <label for="activity">Physical activity (hours/day)</label>
+        <input id="activity" type="number" step="0.1" min="0" max="24" value="1" />
+      </div>
+
+      <div class="field">
+        <label for="sleep">Sleep (hours/night)</label>
+        <input id="sleep" type="number" step="0.1" min="0" max="24" value="7" />
+      </div>
+
+      <div id="hoursWarning" style="
+        display: none;
+        grid-column: 1 / -1;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin-top: -4px;
+      "></div>
+
+      <div class="field wide">
+        <label>Stress level</label>
+        <div class="stress-group" id="stressGroup">
+          <div class="stress-chip" data-value="Low">Low</div>
+          <div class="stress-chip active" data-value="Medium">Medium</div>
+          <div class="stress-chip" data-value="High">High</div>
+          <div class="stress-chip" data-value="Very High">Very High</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="submit" id="submitBtn">Run prediction</button>
+        <span class="status" id="statusText"></span>
+      </div>
+
+      <div class="result-panel" id="resultPanel">
+        <div class="r-label">Predicted mental health score</div>
+        <div class="r-value" id="resultValue">—</div>
+      </div>
+    </form>
+  </main>
+
+</div>
+
+<script>
+  let stressLevel = "Medium";
+  document.getElementById('stressGroup').addEventListener('click', (e) => {
+    const chip = e.target.closest('.stress-chip');
+    if (!chip) return;
+    document.querySelectorAll('.stress-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    stressLevel = chip.dataset.value;
+  });
+
+  // Live hour validation — mirrors the backend model_validator exactly
+  const hoursWarning = document.getElementById('hoursWarning');
+
+  function showHoursWarning(msg) {
+    hoursWarning.style.display = 'block';
+    hoursWarning.style.background = 'rgba(220,50,50,0.12)';
+    hoursWarning.style.border = '1px solid rgba(220,50,50,0.4)';
+    hoursWarning.style.color = '#e05555';
+    hoursWarning.innerHTML = msg;
+  }
+
+  function checkHours() {
+    const sleep    = parseFloat(document.getElementById('sleep').value)    || 0;
+    const activity = parseFloat(document.getElementById('activity').value) || 0;
+    const study    = parseFloat(document.getElementById('study').value)    || 0;
+    const usage    = parseFloat(document.getElementById('usage').value)    || 0;
+    const awake    = 24 - sleep;
+
+    // Rule 1: Sleep + Activity cannot exceed 24h
+    if (sleep + activity > 24) {
+      showHoursWarning(
+        `⛔ <strong>Invalid:</strong> Sleep (${sleep}h) + Physical Activity (${activity}h) ` +
+        `= <strong>${sleep + activity}h</strong>, which exceeds 24 hours. Please correct your inputs.`
+      );
+      return false;
+    }
+
+    // Rule 2: Usage cannot exceed awake hours
+    if (usage > awake) {
+      showHoursWarning(
+        `⛔ <strong>Invalid:</strong> Daily phone usage (${usage}h) cannot exceed your awake time ` +
+        `(<strong>${awake}h</strong> = 24h − ${sleep}h sleep). Please adjust sleep or usage.`
+      );
+      return false;
+    }
+
+    // Rule 3: Master Day Feasibility Rule
+    // Study and Screen Usage can overlap, so together they take at least max(study, usage).
+    const overlapBlock = Math.max(study, usage);
+    const totalNeeded = sleep + activity + overlapBlock;
+
+    if (totalNeeded > 24) {
+      const dominant = study >= usage ? 'Study' : 'Daily Usage';
+      showHoursWarning(
+        `⛔ <strong>Invalid Schedule:</strong> Sleep (${sleep}h) + Physical Activity (${activity}h) + ` +
+        `${dominant} (${overlapBlock}h) = <strong>${totalNeeded}h</strong>, which exceeds 24 hours in a day. ` +
+        `Please verify your daily schedule.`
+      );
+      return false;
+    }
+
+    // All good — hide warning
+    hoursWarning.style.display = 'none';
+    return true;
+  }
+
+  // Wire up live validation to all four relevant inputs (sleep, activity, study, usage)
+  ['sleep', 'activity', 'study', 'usage'].forEach(id =>
+    document.getElementById(id).addEventListener('input', checkHours)
+  );
+
+  const form = document.getElementById('predictForm');
+  const statusText = document.getElementById('statusText');
+  const submitBtn = document.getElementById('submitBtn');
+  const resultPanel = document.getElementById('resultPanel');
+  const resultValue = document.getElementById('resultValue');
+  const gaugeEmpty = document.getElementById('gaugeEmpty');
+  const gaugeResult = document.getElementById('gaugeResult');
+  const scoreValue = document.getElementById('scoreValue');
+  const barFill = document.getElementById('barFill');
+  const scoreRead = document.getElementById('scoreRead');
+
+  function readOut(score){
+    if (score >= 7) return "Comfortably in the higher range of the sample.";
+    if (score >= 4) return "In the mid range of the sample.";
+    return "In the lower range of the sample.";
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusText.textContent = '';
+    statusText.classList.remove('error');
+
+    // Block submission if hours are invalid (same rules as backend)
+    if (!checkHours()) {
+      statusText.textContent = 'Please fix the hour inputs before submitting.';
+      statusText.classList.add('error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Running…';
+
+    const base = document.getElementById('apiBase').value.trim().replace(/\/$/, '');
+
+    const payload = {
+      age: Number(document.getElementById('age').value),
+      gender: document.getElementById('gender').value,
+      country: document.getElementById('country').value,
+      academic_level: document.getElementById('academic_level').value,
+      most_used_platform: document.getElementById('platform').value,
+      purpose_of_use: document.getElementById('purpose').value,
+      avg_daily_usage_hours: Number(document.getElementById('usage').value),
+      daily_unlocks: Number(document.getElementById('unlocks').value),
+      study_hours: Number(document.getElementById('study').value),
+      physical_activity_hours: Number(document.getElementById('activity').value),
+      sleep_hours_per_night: Number(document.getElementById('sleep').value),
+      stress_level: stressLevel,
+    };
+
+    try {
+      const res = await fetch(`${base}/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.text();
+        throw new Error(`Server responded ${res.status}: ${errBody}`);
+      }
+
+      const data = await res.json();
+      const score = data.predicted_mental_health_score;
+
+      resultValue.textContent = score.toFixed(2);
+      resultPanel.classList.add('show');
+
+      gaugeEmpty.style.display = 'none';
+      gaugeResult.style.display = 'block';
+      scoreValue.innerHTML = `${score.toFixed(1)}<span>/ 10</span>`;
+      barFill.style.width = `${Math.max(0, Math.min(100, score * 10))}%`;
+      scoreRead.textContent = readOut(score);
+
+      statusText.textContent = 'Prediction complete.';
+    } catch (err) {
+      statusText.textContent = `Couldn't reach the API — ${err.message}`;
+      statusText.classList.add('error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Run prediction';
+    }
+  });
+</script>
+</body>
+</html>
