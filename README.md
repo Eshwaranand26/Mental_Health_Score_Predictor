@@ -90,7 +90,7 @@ The complete training and analysis workflow is documented in [`ML_Project (1).ip
   - Scaled numerical features (`Study_Hours`, `Daily_Unlocks`, `Sleep_Hours_Per_Night`, etc.) using `StandardScaler`.
   - Encoded nominal features (`Gender`, `Most_Used_Platform`, `Purpose_Of_Use`, grouped `Country`) using `OneHotEncoder`.
   - Mapped ordinal features (`Stress_Level`, `Academic_Level`) to ordered numeric scales.
-- **Model Evaluation:** Tested Linear Regression as a baseline and Random Forest Regressor. The tuned Random Forest model yielded the best performance and was saved as `mental_health_pipeline.pkl`.
+- **Model Evaluation:** Tested Linear Regression as a baseline and Random Forest Regressor, and tuned the Random Forest with `RandomizedSearchCV`. Tuning did not improve the test score, so the default Random Forest was saved as `mental_health_pipeline.pkl`.
 
 ---
 

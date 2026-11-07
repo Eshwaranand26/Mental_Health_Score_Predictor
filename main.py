@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field, model_validator
 
 # Load the trained model pipeline
-model = joblib.load("/Users/eshwar/Documents/ML Work/Projects/Mental_Health_Score_Predictor/mental_health_pipeline.pkl")
+model = joblib.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "mental_health_pipeline.pkl"))
 
 app = FastAPI(title="Mental Health Score Predictor API")
 
